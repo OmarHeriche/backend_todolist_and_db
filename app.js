@@ -1,8 +1,11 @@
+console.time();
 //? importing section :
 const express = require("express");
 const from_routes = require("./routes/task");
 const connectDb = require("./db/connect");
-require('dotenv').config();
+const notFound = require("./middleWeare/not_found");
+const handle_error = require("./middleWeare/handle_errors");
+require("dotenv").config();
 
 const app = express(); //! hadi t9isha tmoute wlidou :) ;
 
@@ -10,8 +13,8 @@ const app = express(); //! hadi t9isha tmoute wlidou :) ;
 app.use(express.json());
 app.use("/api/v1/tasks", from_routes);
 app.use(express.static("./public"));
-
-
+app.use(notFound);
+app.use(handle_error);
 
 const port = 3000;
 const start = async () => {
@@ -25,3 +28,4 @@ const start = async () => {
   }
 };
 start();
+console.timeEnd();

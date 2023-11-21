@@ -1,61 +1,41 @@
 const task = require("../modules/task");
+const Wrapper = require("../middleWeare/asyn");
+const CustomErr = require("../middleWeare/err");
 
-const createTask = async (req, res) => {
-  try {
-    const myTask = await task.create(req.body);
-    res.status(201).json({ task: myTask });
-  } catch (error) {
-    res.status(500).json({ msg: error });
+const createTask = Wrapper(async (req, res) => {
+  const myTask = await task.create(req.body);
+  res.status(201).json({ task: myTask });
+});
+const deleteTask = Wrapper(async (req, res) => {
+  const myTask = await task.findOneAndDelete({ _id: req.params.id });
+  if (!myTask) {
+    return next(
+      new CustomErr(`no task matches with the id : ${req.params.id}`, 404)
+    );
   }
-};
-const deleteTask = async (req, res) => {
-  try{
-    const myTask = await task.findOneAndDelete({_id:req.params.id});
-    if(!myTask){
-      return res.status(404).send(`no task matches with the id : ${req.params.id}`);
-    }
-    res.status(200).json({ task: myTask });
-  }catch(error){
-    res.status(500).json({ msg: error });
+  res.status(200).json({ task: myTask });
+});
+const getAllTasks = Wrapper(async (req, res) => {
+  const myTask = await task.find({});
+  res.status(200).json({ tasks: myTask });
+});
+const getTask = Wrapper(async (req, res,next) => {
+  const myTask = await task.findOne({ _id: req.params.id });
+  if (!myTask) {
+    return next(
+      new CustomErr(`no task matches with the id : ${req.params.id}`,404)
+    );
   }
-
-};
-const getAllTasks = async (req, res) => {
-  try{
-    const myTask = await task.find({});
-    res.status(200).json({tasks:myTask})
-  }catch(error){
-    res.status(500).json({ msg: error });
+  res.status(200).json({ task: myTask });
+});
+const updateTask = Wrapper(async (req, res) => {
+  const myTask = await task.findOneAndUpdate({ _id: req.params.id }, req.body);
+  if (!myTask) {
+    return next(
+      new CustomErr(`no task matches with the id : ${req.params.id}`, 404)
+    );
   }
-  
-};
-const getTask = async (req, res) => {
-  try{
-    const myTask = await task.findOne({_id:req.params.id})
-    if (!myTask) {
-      return res
-        .status(404)
-        .send(`no task matches with the id : ${req.params.id}`);
-    }
-    res.status(200).json({ task: myTask });   
-  }catch(error){
-    res.status(500).json({ msg: error });
-  }
-
-};
-const updateTask = async (req, res) => {
-  try{
-    const myTask = await task.findOneAndUpdate({_id:req.params.id},req.body)
-    if (!myTask) {
-      return res
-        .status(404)
-        .send(`no task matches with the id : ${req.params.id}`);
-    }    
-    res.status(200).json({ id: req.params.id, data: myTask });   
-  }catch(error){
-    res.status(500).json({ msg: error });    
-  }
-
-};
+  res.status(200).json({ id: req.params.id, data: myTask });
+});
 
 module.exports = { getAllTasks, getTask, createTask, deleteTask, updateTask };
